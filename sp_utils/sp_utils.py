@@ -14,14 +14,30 @@ region_name = os.environ.get("AWS_S3_REGION")
 
 def download_from_source(url):
     random_uuid = uuid.uuid4()
+
     if not os.path.exists(tmp_path):
         os.makedirs(tmp_path)
 
     filename = f'{tmp_path}/{random_uuid}.{extract_file_type(url)}'
+
     if not os.path.exists(filename):
-        r = requests.get(url)
-        with open(filename, 'wb') as outfile:
-            outfile.write(r.content)
+        try:
+            # Add a timeout and stream the content
+            stream = True
+            # 5 seconds connect timeout, 10 seconds read timeout
+            timeout = (5, 10)
+            r = requests.get(url, stream=stream, timeout=timeout)
+
+            # Raise an error for failed HTTP requests
+            r.raise_for_status()
+
+            with open(filename, 'wb') as outfile:
+                for chunk in r.iter_content(chunk_size=8192):
+                    outfile.write(chunk)
+        except requests.RequestException as e:
+            print(f"Error downloading image: {e}")
+            return None
+
     return filename
 
 
