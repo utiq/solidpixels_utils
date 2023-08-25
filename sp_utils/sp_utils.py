@@ -3,8 +3,7 @@ import os
 import uuid
 import boto3
 
-project_path = os.getcwd()
-tmp_path = project_path + "/tmp"
+tmp_path = "./tmp"
 
 bucket = os.environ.get("AWS_BUCKET")
 aws_access_key_id = os.environ.get("AWS_S3_ACCESS_KEY_ID")
